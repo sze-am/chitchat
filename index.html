@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal Akademik - Studi Nahwu</title>
+    <style>
+        :root { 
+            --primary: #2c3e50; 
+            --accent: #3498db; 
+            --bg: #fdfdfd; 
+            --wa-bg: #f0f2f5; 
+            --shadow: 0 10px 30px rgba(0,0,0,0.05);
+            --bubble-me: #e3f2fd;
+            --bubble-them: #ffffff;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            color: #2d3436; 
+        }
+
+        header { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(15px);
+            color: var(--primary); 
+            padding: 16px 24px; 
+            box-shadow: 0 1px 0 rgba(0,0,0,0.05); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+        }
+
+        header h1 { font-size: 1rem; margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+
+        .container { 
+            max-width: 800px; 
+            margin: 40px auto; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 24px; 
+            box-shadow: var(--shadow); 
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .article-content { 
+            line-height: 1.8; 
+            font-size: 1.05rem; 
+            color: #444; 
+        }
+        .article-content h2 { 
+            color: var(--primary); 
+            font-weight: 800;
+            border-left: 5px solid var(--accent); 
+            padding-left: 20px; 
+            margin-bottom: 25px; 
+        }
+
+        #login-area { margin-top: 40px; padding-top: 30px; border-top: 1px solid #f1f3f5; text-align: center; }
+        .input-akademik { 
+            width: 100%; 
+            max-width: 320px; 
+            padding: 14px 20px; 
+            border: 2px solid #edf2f7; 
+            border-radius: 14px; 
+            font-size: 1rem; 
+            outline: none; 
+            transition: all 0.3s ease; 
+            background: #f8fafc;
+        }
+        .input-akademik:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1); }
+
+        .btn-akademik { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 14px 32px; 
+            border-radius: 14px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+        .btn-akademik:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* --- Custom Modal System --- */
+        .ui-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.2);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .ui-modal-box {
+            background: white;
+            padding: 32px;
+            border-radius: 28px;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.1);
+        }
+        .ui-modal-text { margin-bottom: 24px; font-weight: 600; color: #1e293b; line-height: 1.5; }
+        .ui-modal-btns { display: flex; gap: 12px; justify-content: center; }
+        .ui-btn { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; flex: 1; transition: 0.2s; }
+        .ui-btn-confirm { background: var(--primary); color: white; }
+        .ui-btn-cancel { background: #f1f5f9; color: #64748b; }
+
+        /* --- Image Preview Overlay --- */
+        #img-viewer {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 100001;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #img-viewer img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        .viewer-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        .btn-viewer {
+            padding: 12px 25px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-dl { background: #22c55e; color: white; }
+        .btn-close-v { background: rgba(255,255,255,0.2); color: white; }
+
+        .hidden-chat { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: var(--wa-bg); 
+            z-index: 10000; 
+            flex-direction: column; 
+        }
+        
+        #chat-header { 
+            background: white; 
+            color: var(--primary); 
+            padding: 16px 20px; 
+            font-weight: 700; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+            font-size: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        #msg-container { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            background-color: var(--wa-bg);
+            scroll-behavior: smooth;
+        }
+
+        .bubble { 
+            padding: 12px 16px; 
+            border-radius: 18px; 
+            max-width: 78%; 
+            font-size: 0.95rem; 
+            position: relative; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); 
+            word-wrap: break-word;
+            transition: transform 0.2s;
+            line-height: 1.5;
+        }
+
+        .new-msg { animation: fadeIn 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .me { align-self: flex-end; background: var(--bubble-me); color: #1e3a8a; border-bottom-right-radius: 4px; }
+        .them { align-self: flex-start; background: var(--bubble-them); color: #334155; border-bottom-left-radius: 4px; }
+        
+        .status-icon { font-size: 0.7rem; margin-left: 8px; color: #94a3b8; float: right; margin-top: 4px; }
+        
+        .sending { opacity: 0.6; filter: grayscale(0.5); }
+        .sending .status-icon::after { content: '⏳'; font-size: 10px; }
+
+        .sender-info { font-size: 0.72rem; font-weight: 800; color: var(--accent); margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.03em; }
+        
+        .img-msg { 
+            max-width: 350px; 
+            width: 100%;
+            height: auto;
+            border-radius: 14px; 
+            margin-top: 6px; 
+            display: block; 
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .img-msg:hover { transform: scale(1.02); filter: brightness(0.95); }
+
+        #context-menu { display: none; position: fixed; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 30000; width: 180px; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
+        .menu-item { padding: 14px 18px; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 500; }
+        .menu-item:hover { background: #f8fafc; }
+        .menu-item.delete { color: #ef4444; }
+
+        #bottom-bar { padding: 16px 20px; background: white; display: flex; gap: 12px; align-items: center; border-top: 1px solid rgba(0,0,0,0.05); }
+        #text-input { flex: 1; padding: 12px 20px; border-radius: 24px; border: 1px solid #f1f5f9; background: #f1f5f9; outline: none; font-size: 1rem; transition: 0.3s; }
+        #text-input:focus { background: white; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
+        
+        .btn-send { 
+            background: var(--accent); 
+            color: white; 
+            border: none; 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.1rem; 
+            transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        .btn-send:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4); }
+
+        #name-modal { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); z-index: 20000; align-items: center; justify-content: center; }
+        .modal-box { background: white; padding: 40px; border-radius: 32px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+
+        @media (max-width: 600px) {
+            .container { margin: 15px; padding: 25px; border-radius: 20px; }
+            .bubble { max-width: 88%; }
+            #bottom-bar { padding: 12px; }
+            .img-msg { max-width: 100%; }
+        }
+
+        #msg-container::-webkit-scrollbar { width: 5px; }
+        #msg-container::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SIAKAD - Studi Bahasa Arab</h1>
+        <div style="font-size: 11px; font-weight: 600; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;">Ruang Diskusi Nahwu</div>
+    </header>
+
+    <div id="ui-overlay" class="ui-modal-overlay">
+        <div class="ui-modal-box">
+            <div id="ui-msg" class="ui-modal-text"></div>
+            <div class="ui-modal-btns">
+                <button id="ui-cancel" class="ui-btn ui-btn-cancel" onclick="uiClose(false)">Batal</button>
+                <button id="ui-ok" class="ui-btn ui-btn-confirm" onclick="uiClose(true)">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="img-viewer">
+        <img id="viewer-img" src="" alt="Preview">
+        <div class="viewer-controls">
+            <button class="btn-viewer btn-close-v" onclick="closePreview()">Tutup</button>
+            <button id="dl-btn-active" class="btn-viewer btn-dl">Unduh Gambar</button>
+        </div>
+    </div>
+
+    <div id="decoy-content" class="container">
+        <div class="article-content">
+            <h2>Analisis Sintaksis Isim Tasniyah</h2>
+            <p>Ilmu nahwu merupakan disiplin utama dalam kajian bahasa Arab yang membahas sistem sintaksis...</p>
+        </div>
+        <div id="login-area">
+            <input type="password" id="hidden-trigger" class="input-akademik" placeholder="Masukkan Kode Otentikasi">
+            <br>
+            <button class="btn-akademik" onclick="checkPassManual()">Buka Akses Materi</button>
+        </div>
+    </div>
+
+    <div id="context-menu">
+        <div class="menu-item" onclick="triggerEdit()">✏️ Edit Pesan</div>
+        <div class="menu-item delete" onclick="triggerDelete()">🗑️ Tarik Pesan</div>
+    </div>
+
+    <div id="name-modal">
+        <div class="modal-box">
+            <h3 style="margin-top:0; font-weight: 800; color: #1e293b;">Verifikasi Mahasiswa</h3>
+            <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 25px;">Nama Anda akan tercatat dalam sistem diskusi kelas secara formal.</p>
+            <input type="text" id="user-name-input" class="input-akademik" placeholder="Nama Lengkap Sesuai KTM">
+            <button class="btn-akademik" style="width:100%; margin-top:20px;" onclick="saveNameAndStart()">Masuk ke Ruang Diskusi</button>
+        </div>
+    </div>
+
+    <div id="secret-chat" class="hidden-chat">
+        <div id="chat-header">
+            <span style="background: #22c55e; width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 10px rgba(34,197,94,0.4);"></span>
+            Ruang Diskusi Kelas
+        </div>
+        <div id="msg-container" onclick="closeMenu()"></div>
+        <div id="bottom-bar">
+            <input type="file" id="fileInp" hidden accept="image/*" onchange="uploadPhoto()">
+            <button onclick="document.getElementById('fileInp').click()" style="border:none; background:none; font-size:22px; cursor:pointer; opacity: 0.5;">📎</button>
+            <input type="text" id="text-input" placeholder="Ketik pesan diskusi..." autocomplete="off">
+            <button class="btn-send" onclick="sendMsg()">➤</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzQbIjPkfvKlIq-cet6yTPA7gIf1Yv3WjBRFSfb5Xys_P3RwxVH-ktZ2p249iDEjZRe2A/exec"; 
+        const SECRET = "21191108";
+        let myName = "";
+        let selectedMsgId = null;
+        let isEditing = false;
+        let pendingMessages = []; 
+        let uiResolver = null;
+        let lastServerData = [];
+
+        function customUI(msg, showCancel = false) {
+            return new Promise(resolve => {
+                document.getElementById('ui-msg').innerText = msg;
+                document.getElementById('ui-cancel').style.display = showCancel ? 'block' : 'none';
+                document.getElementById('ui-overlay').style.display = 'flex';
+                uiResolver = resolve;
+            });
+        }
+
+        function uiClose(val) {
+            document.getElementById('ui-overlay').style.display = 'none';
+            if (uiResolver) uiResolver(val);
+        }
+
+        /* --- PREVIEW SYSTEM --- */
+        function openPreview(src) {
+            const viewer = document.getElementById('img-viewer');
+            const img = document.getElementById('viewer-img');
+            const dlBtn = document.getElementById('dl-btn-active');
+            
+            img.src = src;
+            viewer.style.display = 'flex';
+            
+            // Set action download
+            dlBtn.onclick = () => downloadImg(src);
+        }
+
+        function closePreview() {
+            document.getElementById('img-viewer').style.display = 'none';
+        }
+
+        async function checkPassManual() {
+            if (document.getElementById('hidden-trigger').value === SECRET) {
+                document.getElementById('name-modal').style.display = 'flex';
+            } else { 
+                await customUI("Kode Otentikasi Salah."); 
+            }
+        }
+
+        function saveNameAndStart() {
+            const n = document.getElementById('user-name-input').value;
+            if (n.trim()) {
+                myName = n;
+                document.getElementById('name-modal').style.display = 'none';
+                document.getElementById('decoy-content').style.display = 'none';
+                document.getElementById('secret-chat').style.display = 'flex';
+                fetchData();
+                setInterval(fetchData, 4000);
+            }
+        }
+
+        function downloadImg(dataUrl) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `IMG_HD_${Date.now()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function createBubbleElement(item, index, isPending = false) {
+            const div = document.createElement('div');
+            const isMe = item.nama === myName;
+            div.className = `bubble ${isMe ? 'me' : 'them'} ${isPending ? 'sending' : 'new-msg'}`;
+            div.setAttribute('data-id', index);
+            const key = `${item.nama}-${(item.pesan || "").substring(0,20)}-${index}`;
+            div.setAttribute('data-key', key);
+
+            if(isMe && !isPending && !item.pesan.startsWith("data:image")) {
+                div.onclick = (e) => showMenu(e, index);
+            }
+
+            let content;
+            if (item.pesan.startsWith("data:image")) {
+                // Perubahan: Klik gambar akan memanggil openPreview, bukan downloadImg
+                content = `<img src="${item.pesan}" class="img-msg" onclick="openPreview('${item.pesan}')" title="Klik untuk lihat" loading="lazy">`;
+            } else {
+                content = item.pesan;
+            }
+
+            div.innerHTML = `<span class="sender-info">${item.nama}</span>${content}${isPending ? '<span class="status-icon"></span>' : ''}`;
+            return div;
+        }
+
+        function renderMessages(serverData) {
+            const container = document.getElementById('msg-container');
+            const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+            
+            const existingKeys = Array.from(container.querySelectorAll('.bubble:not(.sending)')).map(el => el.getAttribute('data-key'));
+            const serverKeys = serverData.map((item, index) => `${item.nama}-${item.pesan.substring(0,20)}-${index}`);
+
+            if (JSON.stringify(existingKeys) !== JSON.stringify(serverKeys)) {
+                container.innerHTML = "";
+                serverData.forEach((item, index) => {
+                    container.appendChild(createBubbleElement(item, index));
+                });
+            }
+
+            container.querySelectorAll('.sending').forEach(el => el.remove());
+            pendingMessages.forEach((msg, pIndex) => {
+                container.appendChild(createBubbleElement(msg, `p-${pIndex}`, true));
+            });
+
+            if (isAtBottom) container.scrollTop = container.scrollHeight;
+        }
+
+        async function fetchData() {
+            try {
+                const res = await fetch(API_URL);
+                const raw = await res.json();
+                const serverData = raw.map(d => ({ nama: d[0], pesan: d[1] }));
+                lastServerData = serverData;
+                pendingMessages = pendingMessages.filter(p => !serverData.some(s => s.nama === myName && s.pesan === p.pesan));
+                renderMessages(serverData);
+            } catch (e) {}
+        }
+
+        function showMenu(e, id) {
+            e.stopPropagation();
+            selectedMsgId = id;
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'block';
+            menu.style.left = Math.min(e.pageX, window.innerWidth - 170) + 'px';
+            menu.style.top = e.pageY + 'px';
+        }
+
+        function closeMenu() { document.getElementById('context-menu').style.display = 'none'; }
+
+        async function triggerDelete() {
+            const confirmed = await customUI("Hapus pesan ini?", true);
+            if(!confirmed) return;
+            await post("__DELETE__", selectedMsgId);
+            closeMenu();
+        }
+
+        function triggerEdit() {
+            const container = document.getElementById('msg-container');
+            const target = Array.from(container.children).find(el => el.getAttribute('data-id') == selectedMsgId);
+            if (!target) return;
+            const currentText = target.childNodes[1].textContent;
+            document.getElementById('text-input').value = currentText;
+            document.getElementById('text-input').focus();
+            isEditing = true;
+            closeMenu();
+        }
+
+        async function post(val, editIdx = null) {
+            const msgObj = { nama: myName, pesan: val };
+            if (editIdx === null && val !== "__DELETE__") {
+                pendingMessages.push(msgObj);
+                renderMessages(lastServerData); 
+            }
+            const payload = { nama: myName, pesan: val, index: editIdx, action: editIdx !== null ? "edit" : "send" };
+            try {
+                await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                fetchData(); 
+            } catch (e) { 
+                pendingMessages = pendingMessages.filter(p => p !== msgObj);
+                renderMessages(lastServerData);
+                await customUI("Koneksi bermasalah.");
+            }
+        }
+
+        function sendMsg() {
+            const input = document.getElementById('text-input');
+            if (input.value.trim()) {
+                const val = input.value;
+                input.value = ""; 
+                post(val, isEditing ? selectedMsgId : null);
+                isEditing = false;
+            }
+        }
+
+        function uploadPhoto() {
+            const fileInp = document.getElementById('fileInp');
+            const file = fileInp.files[0];
+            if(!file) return;
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    const TARGET_WIDTH = 1280; 
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > TARGET_WIDTH) {
+                        height = height * (TARGET_WIDTH / width);
+                        width = TARGET_WIDTH;
+                    }
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext("2d");
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+                    
+                    post(dataUrl);
+                    fileInp.value = ""; 
+                };
+            };
+        }
+
+        document.getElementById('text-input').addEventListener('keypress', (e) => { 
+            if (e.key === 'Enter') sendMsg(); 
+        });
+    </script>
+</body>
+</html>
